@@ -2,7 +2,7 @@
 
 import multer from 'multer';
 import nc from 'next-connect';
-import autenticacion from '../middleware/autenticacion';
+import autenticacion from '../../middleware/autenticacion';
 import fetch from 'node-fetch';
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -18,7 +18,7 @@ const handler = nc()
 
     try {
       // Enviar la imagen al endpoint /api/procesar-imagen
-      const respuestaProcesada = await fetch('https://compost-six.vercel.app/api/procesar-imagen', {
+      const respuestaProcesada = await fetch('https://tu-dominio.vercel.app/api/procesar-imagen', {
         method: 'POST',
         headers: {
           'x-api-key': process.env.API_KEY,
