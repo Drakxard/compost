@@ -2,7 +2,7 @@
 
 import multer from 'multer';
 import nc from 'next-connect';
-import autenticacion from '../middleware/autenticacion';
+import autenticacion from './middleware/autenticacion';
 import fetch from 'node-fetch';
 
 const upload = multer({ storage: multer.memoryStorage() });
