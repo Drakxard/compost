@@ -1,38 +1,63 @@
 // pages/api/imagenes.js
 
 import multer from 'multer';
-import nextConnect from 'next-connect';
+import { createRouter } from 'next-connect';
 import autenticacion from './middleware/autenticacion';
+import fetch from 'node-fetch';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-const apiRoute = nextConnect({
-  onError(error, req, res) {
-    res.status(501).json({ error: `Error en el middleware: ${error.message}` });
-  },
-  onNoMatch(req, res) {
-    res.status(405).json({ error: `Método ${req.method} no permitido` });
-  },
-});
+const router = createRouter();
 
-apiRoute.use(autenticacion);
-apiRoute.use(upload.single('imagen'));
+router
+  .use(autenticacion)
+  .use(upload.single('imagen'))
+  .post(async (req, res) => {
+    const imagen = req.file;
+    if (!imagen) {
+      return res.status(400).json({ mensaje: 'No se proporcionó ninguna imagen' });
+    }
 
-apiRoute.post((req, res) => {
-  const imagen = req.file;
-  if (!imagen) {
-    return res.status(400).json({ mensaje: 'No se proporcionó ninguna imagen' });
-  }
+    try {
+      // Enviar la imagen al endpoint /api/procesar-imagen
+      const respuestaProcesada = await fetch('https://compost-six.vercel.app/api/procesar-imagen', {
+        method: 'POST',
+        headers: {
+          'x-api-key': process.env.API_KEY,
+          'Content-Type': 'application/octet-stream',
+        },
+        body: imagen.buffer,
+      });
 
-  // Aquí podrías guardar la imagen temporalmente o pasarla al siguiente proceso
+      const datosProcesados = await respuestaProcesada.json();
 
-  res.status(200).json({ mensaje: 'Imagen recibida correctamente' });
-});
+      if (!respuestaProcesada.ok) {
+        return res.status(respuestaProcesada.status).json(datosProcesados);
+      }
 
-export default apiRoute;
+      // Opcional: Almacenar datosProcesados en la base de datos
+      // ...
+
+      res.status(200).json({
+        mensaje: 'Imagen procesada correctamente',
+        datos: datosProcesados,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ mensaje: 'Error al procesar la imagen' });
+    }
+  });
 
 export const config = {
   api: {
-    bodyParser: false, // Deshabilita el bodyParser integrado de Next.js
+    bodyParser: false,
   },
 };
+
+// Exporta el handler
+export default router.handler({
+  onError: (err, req, res) => {
+    console.error('Error en el endpoint /api/imagenes:', err);
+    res.status(500).end(err.message);
+  },
+});

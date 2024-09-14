@@ -9,7 +9,7 @@ const apiRoute = nextConnect({
     res.status(501).json({ error: `Error en el middleware: ${error.message}` });
   },
   onNoMatch(req, res) {
-    res.status(405).json({ error: `Método ${req.method} no permitido` });
+    res.status(405).json({ error: `Método ${req.method} no permitido desde almacenar-respuesta.js` });
   },
 });
 
