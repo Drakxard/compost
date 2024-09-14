@@ -1,7 +1,7 @@
 // pages/api/almacenar-respuesta.js
 
 import nextConnect from 'next-connect';
-import autenticacion from './middleware/autenticacion';
+import autenticacion from '../middleware/autenticacion';
 import clientPromise from '../../utils/db';
 
 const apiRoute = nextConnect({
