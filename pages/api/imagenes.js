@@ -1,38 +1,77 @@
-// pages/api/imagenes.js
+// pages/api/procesar-imagen.js
 
-import multer from 'multer';
-import nextConnect from 'next-connect';
-import autenticacion from './middleware/autenticacion';
+import nc from 'next-connect';
+import autenticacion from '../../middleware/autenticacion';
+import fetch from 'node-fetch';
+import getRawBody from 'raw-body';
 
-const upload = multer({ storage: multer.memoryStorage() });
+const handler = nc()
+  .use(autenticacion)
+  .post(async (req, res) => {
+    try {
+      // Obtener el buffer de la imagen
+      const imagenBuffer = await getRawBody(req);
+      
+      if (!imagenBuffer || imagenBuffer.length === 0) {
+        return res.status(400).json({ mensaje: 'No se proporcionó ninguna imagen para procesar' });
+      }
 
-const apiRoute = nextConnect({
-  onError(error, req, res) {
-    res.status(501).json({ error: `Error en el middleware: ${error.message}` });
-  },
-  onNoMatch(req, res) {
-    res.status(405).json({ error: `Método ${req.method} no permitido` });
-  },
-});
+      // Codificar la imagen en base64
+      const imagenBase64 = imagenBuffer.toString('base64');
 
-apiRoute.use(autenticacion);
-apiRoute.use(upload.single('imagen'));
+      // Construir el contenido del mensaje para la API de Groq
+      const messages = [
+        {
+          "role": "user",
+          "content": [
+            { "type": "text", "text": "What's in this image?" },
+            {
+              "type": "image_url",
+              "image_url": {
+                "url": `data:image/jpeg;base64,${imagenBase64}`,
+              },
+            },
+          ],
+        },
+      ];
 
-apiRoute.post((req, res) => {
-  const imagen = req.file;
-  if (!imagen) {
-    return res.status(400).json({ mensaje: 'No se proporcionó ninguna imagen' });
-  }
+      // Hacer la solicitud a la API de Groq
+      const response = await fetch('https://api.groq.com/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          messages: messages,
+          model: 'llava-v1.5-7b-4096-preview',
+        }),
+      });
 
-  // Aquí podrías guardar la imagen temporalmente o pasarla al siguiente proceso
+      const datosProcesados = await response.json();
 
-  res.status(200).json({ mensaje: 'Imagen recibida correctamente' });
-});
+      // Manejar posibles errores de la API de Groq
+      if (!response.ok) {
+        return res.status(response.status).json(datosProcesados);
+      }
 
-export default apiRoute;
+      // Opcional: Almacenar datosProcesados en la base de datos
+      // ...
+
+      res.status(200).json({
+        mensaje: 'Imagen procesada correctamente',
+        datos: datosProcesados,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ mensaje: 'Error al procesar la imagen con la API de Groq' });
+    }
+  });
+
+export default handler;
 
 export const config = {
   api: {
-    bodyParser: false, // Deshabilita el bodyParser integrado de Next.js
+    bodyParser: false,
   },
 };
