@@ -1,101 +1,128 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState, useRef } from 'react'
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Camera, Upload, Download } from 'lucide-react'
+
+export default function CompostApp() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [selectedReport, setSelectedReport] = useState('')
+  const [photo, setPhoto] = useState<string | null>(null)
+  const [isCameraOpen, setIsCameraOpen] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleLogin = () => {
+    setIsLoggedIn(true)
+  }
+
+  const handlePhotoCapture = () => {
+    setIsCameraOpen(true)
+  }
+
+  const simulatePhotoCapture = () => {
+    setPhoto('/placeholder.svg?height=300&width=300')
+    setIsCameraOpen(false)
+  }
+
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setPhoto(URL.createObjectURL(file))
+    }
+  }
+
+  const handleConfirm = async () => {
+    console.log('Confirming photo:', photo)
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="container mx-auto p-4 max-w-2xl">
+      <Card>
+        <CardHeader className="flex flex-col items-center space-y-4">
+          <CardTitle className="text-2xl font-bold text-center">Aplicación de Compost</CardTitle>
+          {!isLoggedIn && (
+            <Button onClick={handleLogin} className="w-full sm:w-auto">
+              Ingresar
+            </Button>
+          )}
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {isLoggedIn && (
+            <>
+              <div className="flex space-x-2">
+                <Select value={selectedReport} onValueChange={setSelectedReport}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Seleccionar informe" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ultimo">Último informe</SelectItem>
+                    <SelectItem value="2">Informe 2</SelectItem>
+                    <SelectItem value="3">Informe 3</SelectItem>
+                    <SelectItem value="custom">Escoger fecha</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button onClick={() => {/* Lógica para descargar informe */}}>
+                  <Download className="mr-2 h-4 w-4" /> Descargar Informe
+                </Button>
+              </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+              <div className="flex justify-center space-x-4">
+                <Dialog open={isCameraOpen} onOpenChange={setIsCameraOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={handlePhotoCapture}>
+                      <Camera className="mr-2 h-4 w-4" /> Tomar Foto
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Capturar Foto</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex flex-col items-center space-y-4">
+                      <div className="w-64 h-64 bg-gray-200 flex items-center justify-center">
+                        <Camera size={48} />
+                      </div>
+                      <Button onClick={simulatePhotoCapture}>Capturar</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <Button onClick={() => fileInputRef.current?.click()}>
+                  <Upload className="mr-2 h-4 w-4" /> Subir Foto
+                </Button>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                  ref={fileInputRef}
+                />
+              </div>
+
+              {photo && (
+                <div className="mt-4 space-y-4">
+                  <div className="relative w-64 h-64 mx-auto bg-gray-100 rounded-lg overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <img 
+                        src={photo} 
+                        alt="Foto seleccionada" 
+                        className="w-full h-full object-cover"
+                        style={{
+                          objectPosition: 'center',
+                          objectFit: 'cover',
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <Button onClick={handleConfirm} className="w-full">Confirmar</Button>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
-  );
+  )
 }
