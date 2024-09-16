@@ -2,43 +2,52 @@
 
 import Image from 'next/image';
 import './globals.css';
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Camera, Upload, Download } from 'lucide-react'
 
 export default function CompostApp() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [selectedReport, setSelectedReport] = useState('')
   const [photo, setPhoto] = useState<string | null>(null)
-  const [isCameraOpen, setIsCameraOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
+  }, [])
 
   const handleLogin = () => {
     setIsLoggedIn(true)
   }
 
   const handlePhotoCapture = () => {
-    setIsCameraOpen(true)
-  }
-
-  const simulatePhotoCapture = () => {
-    setPhoto('/placeholder.svg?height=300&width=300')
-    setIsCameraOpen(false)
+    if (isMobile && cameraInputRef.current) {
+      cameraInputRef.current.click()
+    } else {
+      // Aquí iría la lógica para abrir la cámara web en desktop
+      console.log("Abriendo cámara web en desktop")
+    }
   }
 
   const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      setPhoto(URL.createObjectURL(file))
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setPhoto(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
     }
   }
 
   const handleConfirm = async () => {
     console.log('Confirming photo:', photo)
+    // Aquí puedes agregar la lógica para enviar la foto al servidor o procesarla
   }
 
   return (
@@ -73,24 +82,9 @@ export default function CompostApp() {
               </div>
 
               <div className="flex justify-center space-x-4">
-                <Dialog open={isCameraOpen} onOpenChange={setIsCameraOpen}>
-                  <DialogTrigger asChild>
-                    <Button onClick={handlePhotoCapture}>
-                      <Camera className="mr-2 h-4 w-4" /> Tomar Foto
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Capturar Foto</DialogTitle>
-                    </DialogHeader>
-                    <div className="flex flex-col items-center space-y-4">
-                      <div className="w-64 h-64 bg-gray-200 flex items-center justify-center">
-                        <Camera size={48} />
-                      </div>
-                      <Button onClick={simulatePhotoCapture}>Capturar</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <Button onClick={handlePhotoCapture}>
+                  <Camera className="mr-2 h-4 w-4" /> Tomar Foto
+                </Button>
                 <Button onClick={() => fileInputRef.current?.click()}>
                   <Upload className="mr-2 h-4 w-4" /> Subir Foto
                 </Button>
@@ -101,20 +95,28 @@ export default function CompostApp() {
                   className="hidden"
                   ref={fileInputRef}
                 />
+                <Input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                  ref={cameraInputRef}
+                />
               </div>
-{photo && (
-  <div className="mt-4 space-y-4">
-    <div className="relative w-64 h-64 mx-auto bg-gray-100 rounded-lg overflow-hidden">
-      <Image 
-        src={photo} 
-        alt="Foto seleccionada" 
-        layout="fill"
-        objectFit="cover"
-      />
-    </div>
-    <Button onClick={handleConfirm} className="w-full">Confirmar</Button>
-  </div>
 
+              {photo && (
+                <div className="mt-4 space-y-4">
+                  <div className="relative w-64 h-64 mx-auto bg-gray-100 rounded-lg overflow-hidden">
+                    <Image 
+                      src={photo} 
+                      alt="Foto seleccionada" 
+                      layout="fill"
+                      objectFit="cover"
+                    />
+                  </div>
+                  <Button onClick={handleConfirm} className="w-full">Confirmar</Button>
+                </div>
               )}
             </>
           )}
@@ -123,4 +125,3 @@ export default function CompostApp() {
     </div>
   )
 }
-
