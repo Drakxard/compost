@@ -1,7 +1,5 @@
 'use client'
 
-import Image from 'next/image';
-import './globals.css';
 import { useState, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -10,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Camera, Upload, Download } from 'lucide-react'
 
-export default function CompostApp() {
+export function Page() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [selectedReport, setSelectedReport] = useState('')
   const [photo, setPhoto] = useState<string | null>(null)
@@ -102,19 +100,24 @@ export default function CompostApp() {
                   ref={fileInputRef}
                 />
               </div>
-{photo && (
-  <div className="mt-4 space-y-4">
-    <div className="relative w-64 h-64 mx-auto bg-gray-100 rounded-lg overflow-hidden">
-      <Image 
-        src={photo} 
-        alt="Foto seleccionada" 
-        layout="fill"
-        objectFit="cover"
-      />
-    </div>
-    <Button onClick={handleConfirm} className="w-full">Confirmar</Button>
-  </div>
 
+              {photo && (
+                <div className="mt-4 space-y-4">
+                  <div className="relative w-64 h-64 mx-auto bg-gray-100 rounded-lg overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <img 
+                        src={photo} 
+                        alt="Foto seleccionada" 
+                        className="w-full h-full object-cover"
+                        style={{
+                          objectPosition: 'center',
+                          objectFit: 'cover',
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <Button onClick={handleConfirm} className="w-full">Confirmar</Button>
+                </div>
               )}
             </>
           )}
@@ -123,4 +126,3 @@ export default function CompostApp() {
     </div>
   )
 }
-
