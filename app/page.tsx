@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image';
 import './globals.css';
 import { useState, useRef } from 'react'
 import { Button } from "@/components/ui/button"
@@ -106,7 +107,7 @@ export default function CompostApp() {
                 <div className="mt-4 space-y-4">
                   <div className="relative w-64 h-64 mx-auto bg-gray-100 rounded-lg overflow-hidden">
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <img 
+                      <Image 
                         src={photo} 
                         alt="Foto seleccionada" 
                         className="w-full h-full object-cover"
