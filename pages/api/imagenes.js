@@ -1,63 +1,72 @@
 // pages/api/imagenes.js
 
-import multer from 'multer';
 import { createRouter } from 'next-connect';
-import autenticacion from './middleware/autenticacion';
-import fetch from 'node-fetch';
-
-const upload = multer({ storage: multer.memoryStorage() });
+import autenticacion from './middleware/autenticacion'; // Asegúrate de que la ruta es correcta
+import Groq from 'groq-sdk';
+import clientPromise from '../../lib/mongodb'; // Importa clientPromise
 
 const router = createRouter();
 
+// Inicializar el cliente de Groq con tu API Key
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+  timeout: 50000,
+});
+
 router
   .use(autenticacion)
-  .use(upload.single('imagen'))
   .post(async (req, res) => {
-    const imagen = req.file;
-    if (!imagen) {
-      return res.status(400).json({ mensaje: 'No se proporcionó ninguna imagen' });
-    }
-
     try {
-      // Enviar la imagen al endpoint /api/procesar-imagen
-      const respuestaProcesada = await fetch('https://compost-six.vercel.app/api/procesar-imagen', {
-        method: 'POST',
-        headers: {
-          'x-api-key': process.env.API_KEY,
-          'Content-Type': 'application/octet-stream',
-        },
-        body: imagen.buffer,
-      });
+      const { messages, model } = req.body;
 
-      const datosProcesados = await respuestaProcesada.json();
-
-      if (!respuestaProcesada.ok) {
-        return res.status(respuestaProcesada.status).json(datosProcesados);
+      if (!messages || !model) {
+        return res.status(400).json({ mensaje: 'Faltan datos en la solicitud' });
       }
 
-      // Opcional: Almacenar datosProcesados en la base de datos
-      // ...
+      console.log('Payload enviado a la API de Groq:', {
+        messages,
+        model,
+      });
+
+      // Realizar la solicitud a la API de Groq usando el SDK
+      const chatCompletion = await groq.chat.completions.create({
+        messages,
+        model,
+      });
+
+      // Almacenar los datos en MongoDB
+      const client = await clientPromise;
+      const db = client.db('compost'); // Usa el nombre de la base de datos de la URI
+      const collection = db.collection('datos'); // Reemplaza con el nombre de tu colección
+
+      const resultado = await collection.insertOne({
+        messages,
+        model,
+        respuesta: chatCompletion,
+        fecha: new Date(),
+      });
+
+      console.log('Datos almacenados en MongoDB con ID:', resultado.insertedId);
 
       res.status(200).json({
-        mensaje: 'Imagen procesada correctamente',
-        datos: datosProcesados,
+        mensaje: 'Imagen procesada y datos almacenados correctamente',
+        datos: chatCompletion,
       });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ mensaje: 'Error al procesar la imagen' });
+      console.error('Error al procesar la imagen:', error);
+      res.status(500).json({ mensaje: 'Error al procesar la imagen', detalles: error.message });
     }
   });
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-// Exporta el handler
 export default router.handler({
   onError: (err, req, res) => {
     console.error('Error en el endpoint /api/imagenes:', err);
     res.status(500).end(err.message);
   },
 });
+
+export const config = {
+  api: {
+    bodyParser: true,
+  },
+};
