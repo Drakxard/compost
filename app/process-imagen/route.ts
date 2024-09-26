@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { Groq } from 'groq-sdk'
-import clientPromise from '../../../lib/mongodb'
+import clientPromise from '@/lib/mongodb'
 import { MongoClient } from 'mongodb'
 
 // Initialize Groq client
