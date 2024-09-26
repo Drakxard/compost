@@ -11,11 +11,7 @@ const groq = new Groq({
 
 export async function POST(req: Request) {
   const headersList = headers()
-  const apiKey = headersList.get('x-api-key')
-
-  if (apiKey !== process.env.API_KEY) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const apiKey = headersList.get('x_api_key')
 
   try {
     const { base64Image, prompt } = await req.json()
@@ -25,13 +21,17 @@ export async function POST(req: Request) {
     }
 
     const chat_completion = await groq.chat.completions.create({
+    "model": "llava-v1.5-7b-4096-preview",
+    "temperature": 0.2,
+    "max_tokens": 50,
+    "top_p": 1,
       messages: [
         {
           role: "user",
           content: [
-            { type: "text", text: prompt },
-            {
-              type: "image_url",
+            {"type": "text", "text": "Analyze the image and choose how to justify it according to the image provided: Initial mesophilic phase Color: Mix of light brown and green. Texture: Large and visible fragments, such as leaves or food remains. Humidity: Humid material, without signs of advanced decomposition. Thermophilic phase Color: Dark brown. Texture: More uniform material but with some visible fragments such as wood or shells. Other signs: There may be visible steam or signs of heat. Cooling phase Color: Dark brown. Texture: Looser and grainier, some small fragments may be present. Condition: No signs of heat.Maturation Phase Color: Dark brown or black.Texture: Very loose and grainy, without visible fragments.Condition: Fully stabilized material."},
+                {
+                    "type": "image_url",
               image_url: {
                 url: `data:image/jpeg;base64,${base64Image}`,
               },
@@ -39,7 +39,8 @@ export async function POST(req: Request) {
           ],
         },
       ],
-      model: "llava-v1.5-7b-4096-preview",
+
+
     })
 
     const analysisResult = chat_completion.choices[0].message.content
@@ -60,6 +61,6 @@ export async function POST(req: Request) {
     })
   } catch (error) {
     console.error('Error processing image:', error)
-    return NextResponse.json({ error: 'Error processing image' }, { status: 500 })
+    return NextResponse.json({ error: 'Error processing image' }, { status: 590 })
   }
 }
