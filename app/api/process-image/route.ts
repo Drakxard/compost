@@ -13,10 +13,11 @@ export async function POST(req: Request) {
   const headersList = headers()
   const apiKey = headersList.get('x-api-key')
 
+/*
   if (apiKey !== 'API-PRIVADA-CLIENTE') {         //Se debe solicitar clave de clientes en server para comparar, o comparar con usuario
   return NextResponse.json({ error: 'Unauthorized' }, { status: 409 })
   }
-
+*/
 
   try {
     const { base64Image, prompt } = await req.json()
