@@ -11,7 +11,7 @@ const groq = new Groq({
 
 export async function POST(req: Request) {
   const headersList = headers()
-  const apiKey = headersList.get('x-api-key')
+  const apiKey = headersList.get('x_api_key')
 
   try {
     const { base64Image, prompt } = await req.json()

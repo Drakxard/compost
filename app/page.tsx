@@ -57,7 +57,7 @@ export default function CompostApp() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': 'API-PRIVADA-CLIENTE', // Se debe generar clase cliente
+          'x_api_key': 'API-PRIVADA-CLIENTE', // Se debe generar clase cliente
         },
         body: JSON.stringify({
           base64Image,
