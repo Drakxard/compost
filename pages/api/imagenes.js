@@ -1,9 +1,7 @@
-// pages/api/imagenes.js
-
 import { createRouter } from 'next-connect';
 import autenticacion from './middleware/autenticacion'; // Asegúrate de que la ruta es correcta
 import Groq from 'groq-sdk';
-import clientPromise from '../../lib/mongodb'; // Importa clientPromise
+import clientPromise from '../../lib/mongodb';
 
 const router = createRouter();
 

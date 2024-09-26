@@ -1,7 +1,6 @@
 'use client'
 
-import Image from 'next/image';
-import './globals.css';
+import Image from 'next/image'
 import { useState, useRef, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -13,6 +12,7 @@ export default function CompostApp() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [selectedReport, setSelectedReport] = useState('')
   const [photo, setPhoto] = useState<string | null>(null)
+  const [analysisResult, setAnalysisResult] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const [isMobile, setIsMobile] = useState(false)
@@ -29,8 +29,7 @@ export default function CompostApp() {
     if (isMobile && cameraInputRef.current) {
       cameraInputRef.current.click()
     } else {
-      // Aquí iría la lógica para abrir la cámara web en desktop
-      console.log("Abriendo cámara web en desktop")
+      console.log("Opening webcam on desktop")
     }
   }
 
@@ -39,15 +38,43 @@ export default function CompostApp() {
     if (file) {
       const reader = new FileReader()
       reader.onload = (e) => {
-        setPhoto(e.target?.result as string)
+        const result = e.target?.result
+        if (typeof result === 'string') {
+          setPhoto(result)
+        }
       }
       reader.readAsDataURL(file)
     }
   }
 
   const handleConfirm = async () => {
-    console.log('Confirming photo:', photo)
-    // Aquí puedes agregar la lógica para enviar la foto al servidor o procesarla
+    if (!photo) return
+
+    try {
+      const base64Image = photo.split(',')[1] // Remove the data:image/jpeg;base64, part
+
+      const response = await fetch('/api/process-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': 'API-PRIVADA-CLIENTE', // Se debe generar clase cliente
+        },
+        body: JSON.stringify({
+          base64Image,
+          prompt: "Analyze the image and choose how to justify it according to the image provided: Initial mesophilic phase Color: Mix of light brown and green. Texture: Large and visible fragments, such as leaves or food remains. Humidity: Humid material, without signs of advanced decomposition. Thermophilic phase Color: Dark brown. Texture: More uniform material but with some visible fragments such as wood or shells. Other signs: There may be visible steam or signs of heat. Cooling phase Color: Dark brown. Texture: Looser and grainier, some small fragments may be present. Condition: No signs of heat.Maturation Phase Color: Dark brown or black.Texture: Very loose and grainy, without visible fragments.Condition: Fully stabilized material.",
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+
+      const result = await response.json()
+      setAnalysisResult(result.data)
+    } catch (error) {
+      console.error('Error:', error)
+      setAnalysisResult('Error processing image')
+    }
   }
 
   return (
@@ -116,6 +143,13 @@ export default function CompostApp() {
                     />
                   </div>
                   <Button onClick={handleConfirm} className="w-full">Confirmar</Button>
+                </div>
+              )}
+
+              {analysisResult && (
+                <div className="mt-4 p-4 bg-black text-white rounded-lg">
+                  <h3 className="font-bold mb-2">Resultado del análisis:</h3>
+                  <p>{analysisResult}</p>
                 </div>
               )}
             </>
