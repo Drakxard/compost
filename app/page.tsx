@@ -269,8 +269,8 @@ export default function CompostControlPanel() {
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="orangepi">Orange Pi Zero 2</TabsTrigger>
-                  <TabsTrigger value="arduino">Arduino UNO R3</TabsTrigger>
+                  <TabsTrigger value="orangepi">Orange Pi</TabsTrigger>
+                  <TabsTrigger value="arduino">Arduino</TabsTrigger>
                   <TabsTrigger value="esp8266">ESP8266</TabsTrigger>
                 </TabsList>
                 <TabsContent value="orangepi">
