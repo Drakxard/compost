@@ -277,66 +277,81 @@ export default function CompostControlPanel() {
                 </div>
               )}
 
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="orangepi">Orange Pi Zero 2</TabsTrigger>
-                  <TabsTrigger value="arduino">Arduino UNO R3</TabsTrigger>
-                  <TabsTrigger value="esp8266">ESP8266</TabsTrigger>
-                  <TabsTrigger value="sensordata">Sensor Data</TabsTrigger>
-                </TabsList>
-                <TabsContent value="orangepi">
-                  <Device name="Orange Pi Zero 2" gpios={orangePiGPIOs} />
-                </TabsContent>
-                <TabsContent value="arduino">
-                  <Device name="Arduino UNO R3" gpios={arduinoGPIOs} />
-                </TabsContent>
-                <TabsContent value="esp8266">
-                  <Device name="ESP8266" gpios={esp8266GPIOs} />
-                </TabsContent>
-                <TabsContent value="sensordata">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Datos del Sensor</CardTitle>
-                      <CardDescription>Lecturas de Temperatura y Humedad</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={[...sensorData].reverse()}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis 
-                            dataKey="timestamp"
-                            tickFormatter={(timestamp) => new Date(timestamp).toLocaleTimeString()}
-                          />
-                          <YAxis yAxisId="left" />
-                          <YAxis yAxisId="right" orientation="right" />
-                          <Tooltip 
-                            labelFormatter={(timestamp) => new Date(timestamp).toLocaleString()}
-                          />
-                          <Legend />
-                          <Line 
-                            yAxisId="left" 
-                            type="monotone" 
-                            dataKey="temperatura" 
-                            name="Temperatura (°C)"
-                            stroke="#8884d8" 
-                            activeDot={{ r: 8 }} 
-                          />
-                          <Line 
-                            yAxisId="right" 
-                            type="monotone" 
-                            dataKey="humedad" 
-                            name="Humedad (%)"
-                            stroke="#82ca9d" 
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            </>
-          )}
-        </CardContent>
+   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="orangepi">Orange Pi</TabsTrigger>
+            <TabsTrigger value="arduino">Arduino</TabsTrigger>
+            <TabsTrigger value="esp8266">ESP8266</TabsTrigger>
+            <TabsTrigger value="sensordata">Datos Sensor</TabsTrigger>
+          </TabsList>
+          <TabsContent value="orangepi">
+            <Device name="Orange Pi Zero 2" gpios={orangePiGPIOs} />
+          </TabsContent>
+          <TabsContent value="arduino">
+            <Device name="Arduino UNO R3" gpios={arduinoGPIOs} />
+          </TabsContent>
+          <TabsContent value="esp8266">
+            <Device name="ESP8266" gpios={esp8266GPIOs} />
+          </TabsContent>
+          <TabsContent value="sensordata">
+            <Card>
+              <CardHeader>
+                <CardTitle>Datos del Sensor</CardTitle>
+                <CardDescription>Lecturas de Temperatura y Humedad</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={sensorData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="timestamp"
+                        tickFormatter={(timestamp) => {
+                          const date = new Date(timestamp);
+                          return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+                        }}
+                      />
+                      <YAxis 
+                        yAxisId="left"
+                        label={{ value: 'Temperatura (°C)', angle: -90, position: 'insideLeft' }}
+                      />
+                      <YAxis 
+                        yAxisId="right" 
+                        orientation="right"
+                        label={{ value: 'Humedad (%)', angle: 90, position: 'insideRight' }}
+                      />
+                      <Tooltip 
+                        labelFormatter={(timestamp) => new Date(timestamp).toLocaleString()}
+                        formatter={(value, name) => [
+                          `${value}${name === "temperatura" ? "°C" : "%"}`,
+                          name === "temperatura" ? "Temperatura" : "Humedad"
+                        ]}
+                      />
+                      <Legend />
+                      <Line 
+                        yAxisId="left" 
+                        type="monotone" 
+                        dataKey="temperatura" 
+                        name="Temperatura"
+                        stroke="#8884d8" 
+                        activeDot={{ r: 8 }} 
+                        dot={false}
+                      />
+                      <Line 
+                        yAxisId="right" 
+                        type="monotone" 
+                        dataKey="humedad" 
+                        name="Humedad"
+                        stroke="#82ca9d" 
+                        dot={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </Card>
     </div>
   )
