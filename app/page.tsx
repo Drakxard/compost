@@ -333,12 +333,16 @@ export default function CompostControlPanel() {
                         orientation="right"
                         label={{ value: 'Humedad (%)', angle: 90, position: 'insideRight' }}
                       />
-                      <Tooltip 
+                       <Tooltip 
                         labelFormatter={(timestamp) => new Date(timestamp).toLocaleString()}
-                        formatter={(value, name) => [
-                          `${value}${name === "temperatura" ? "°C" : "%"}`,
-                          name === "temperatura" ? "Temperatura" : "Humedad"
-                        ]}
+                        formatter={(value, name) => {
+                          if (name === "temperatura") {
+                            return [`${value} °C`, "Temperatura"];
+                          } else if (name === "humedad") {
+                            return [`${value} %`, "Humedad"];
+                          }
+                          return value;
+                        }}
                       />
                       <Legend />
                       <Line 
