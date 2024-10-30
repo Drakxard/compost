@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Camera, Upload, Download } from 'lucide-react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 type GPIOPin = {
   pin: string
@@ -72,7 +71,6 @@ export default function CompostControlPanel() {
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const [isMobile, setIsMobile] = useState(false)
   const [activeTab, setActiveTab] = useState("orangepi")
-  const [sensorData, setSensorData] = useState([])
 
   const [orangePiGPIOs, setOrangePiGPIOs] = useState<GPIOPin[]>([
     { pin: "GPIO 229 (wPi 0)", description: "SDA.3", state: false },
@@ -136,27 +134,6 @@ export default function CompostControlPanel() {
     setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
   }, [])
 
-  useEffect(() => {
-    const fetchSensorData = async () => {
-      try {
-        const response = await fetch('/api/get-sensor-data')
-        if (response.ok) {
-          const data = await response.json()
-          setSensorData(data)
-        } else {
-          console.error('Failed to fetch sensor data')
-        }
-      } catch (error) {
-        console.error('Error fetching sensor data:', error)
-      }
-    }
-
-    fetchSensorData()
-    const interval = setInterval(fetchSensorData, 60000) // Fetch data every minute
-
-    return () => clearInterval(interval)
-  }, [])
-
   const handleLogin = () => {
     setIsLoggedIn(true)
   }
@@ -189,7 +166,7 @@ export default function CompostControlPanel() {
     try {
       const base64Image = photo.split(',')[1] // Remove the data:image/jpeg;base64, part
 
-      const response = await  fetch('/api/process-image', {
+      const response = await fetch('/api/process-image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -291,11 +268,10 @@ export default function CompostControlPanel() {
               )}
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="orangepi">Orange Pi</TabsTrigger>
                   <TabsTrigger value="arduino">Arduino</TabsTrigger>
                   <TabsTrigger value="esp8266">ESP8266</TabsTrigger>
-                  <TabsTrigger value="sensordata">Datos del Sensor</TabsTrigger>
                 </TabsList>
                 <TabsContent value="orangepi">
                   <Device name="Orange Pi Zero 2" gpios={orangePiGPIOs} />
@@ -305,28 +281,6 @@ export default function CompostControlPanel() {
                 </TabsContent>
                 <TabsContent value="esp8266">
                   <Device name="ESP8266" gpios={esp8266GPIOs} />
-                </TabsContent>
-                <TabsContent value="sensordata">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Datos del Sensor</CardTitle>
-                      <CardDescription>Lecturas de Temperatura y Humedad</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={sensorData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="timestamp" />
-                          <YAxis yAxisId="left" />
-                          <YAxis yAxisId="right" orientation="right" />
-                          <Tooltip />
-                          <Legend />
-                          <Line yAxisId="left" type="monotone" dataKey="temperatura" stroke="#8884d8" activeDot={{ r: 8 }} />
-                          <Line yAxisId="right" type="monotone" dataKey="humedad" stroke="#82ca9d" />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
                 </TabsContent>
               </Tabs>
             </>
