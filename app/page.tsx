@@ -304,16 +304,13 @@ export default function CompostControlPanel() {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={sensorData}>
                       <CartesianGrid strokeDasharray="3 3" />
-                     
-                     <XAxis 
-                        dataKey="timestamp"
-                        reversed={true}
+                      <XAxis 
+                        dataKey="timestamp" reversed
                         tickFormatter={(timestamp) => {
                           const date = new Date(timestamp);
                           return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
                         }}
-                     />
-
+                      />
                       <YAxis 
                         yAxisId="left"
                         label={{ value: 'Temperatura (°C)', angle: -90, position: 'insideLeft' }}
