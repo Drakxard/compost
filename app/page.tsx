@@ -315,10 +315,10 @@ export default function CompostControlPanel() {
                     <CardContent className="pt-6">
                 <div className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={sensorData}>
+                    <LineChart data={sensorData.slice().reverse()}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis 
-                        dataKey="timestamp" reversed
+                        dataKey="timestamp"
                         tickFormatter={(timestamp) => {
                           const date = new Date(timestamp);
                           return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
