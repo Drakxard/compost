@@ -312,20 +312,56 @@ export default function CompostControlPanel() {
                       <CardTitle>Datos del Sensor</CardTitle>
                       <CardDescription>Lecturas de Temperatura y Humedad</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={sensorData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="timestamp" />
-                          <YAxis yAxisId="left" />
-                          <YAxis yAxisId="right" orientation="right" />
-                          <Tooltip />
-                          <Legend />
-                          <Line yAxisId="left" type="monotone" dataKey="temperatura" stroke="#8884d8" activeDot={{ r: 8 }} />
-                          <Line yAxisId="right" type="monotone" dataKey="humedad" stroke="#82ca9d" />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </CardContent>
+                    <CardContent className="pt-6">
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={sensorData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="timestamp"
+                        tickFormatter={(timestamp) => {
+                          const date = new Date(timestamp);
+                          return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+                        }}
+                      />
+                      <YAxis 
+                        yAxisId="left"
+                        label={{ value: 'Temperatura (°C)', angle: -90, position: 'insideLeft' }}
+                      />
+                      <YAxis 
+                        yAxisId="right" 
+                        orientation="right"
+                        label={{ value: 'Humedad (%)', angle: 90, position: 'insideRight' }}
+                      />
+                      <Tooltip 
+                        labelFormatter={(timestamp) => new Date(timestamp).toLocaleString()}
+                        formatter={(value, name) => [
+                          `${value}${name === "temperatura" ? "°C" : "%"}`,
+                          name === "temperatura" ? "Temperatura" : "Humedad"
+                        ]}
+                      />
+                      <Legend />
+                      <Line 
+                        yAxisId="left" 
+                        type="monotone" 
+                        dataKey="temperatura" 
+                        name="Temperatura"
+                        stroke="#8884d8" 
+                        activeDot={{ r: 8 }} 
+                        dot={false}
+                      />
+                      <Line 
+                        yAxisId="right" 
+                        type="monotone" 
+                        dataKey="humedad" 
+                        name="Humedad"
+                        stroke="#82ca9d" 
+                        dot={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
                   </Card>
                 </TabsContent>
               </Tabs>
