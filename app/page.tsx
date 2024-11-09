@@ -12,57 +12,6 @@ import { Input } from "@/components/ui/input"
 import { Camera, Upload, Download } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
-type GPIOPin = {
-  pin: string
-  description: string
-  state: boolean
-}
-
-type DeviceProps = {
-  name: string
-  gpios: GPIOPin[]
-}
-
-const Device: React.FC<DeviceProps> = ({ name, gpios }) => {
-  const [pins, setPins] = useState(gpios)
-
-  const handleToggle = (index: number) => {
-    setPins(prevPins => 
-      prevPins.map((pin, i) => 
-        i === index ? { ...pin, state: !pin.state } : pin
-      )
-    )
-    // Aquí iría la lógica para enviar el comando al dispositivo físico
-    console.log(`Toggled ${name} pin ${pins[index].pin} to ${!pins[index].state}`)
-  }
-
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>{name}</CardTitle>
-        <CardDescription>Control de GPIO</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {pins.map((pin, index) => (
-            <div key={pin.pin} className="flex items-center justify-between space-x-2">
-              <Label htmlFor={`${name}-${pin.pin}`} className="flex flex-col">
-                <span className="font-medium">{pin.pin}</span>
-                <span className="text-sm text-muted-foreground">{pin.description}</span>
-              </Label>
-              <Switch
-                id={`${name}-${pin.pin}`}
-                checked={pin.state}
-                onCheckedChange={() => handleToggle(index)}
-              />
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
 export default function CompostControlPanel() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [selectedReport, setSelectedReport] = useState('')
@@ -74,63 +23,6 @@ export default function CompostControlPanel() {
   const [activeTab, setActiveTab] = useState("orangepi")
   const [sensorData, setSensorData] = useState([])
 
-  const [orangePiGPIOs, setOrangePiGPIOs] = useState<GPIOPin[]>([
-    { pin: "GPIO 229 (wPi 0)", description: "SDA.3", state: false },
-    { pin: "GPIO 228 (wPi 1)", description: "SCL.3", state: false },
-    { pin: "GPIO 73 (wPi 2)", description: "PC9", state: false },
-    { pin: "GPIO 226 (wPi 3)", description: "TXD.5", state: false },
-    { pin: "GPIO 227 (wPi 4)", description: "RXD.5", state: false },
-    { pin: "GPIO 70 (wPi 5)", description: "PC6", state: false },
-    { pin: "GPIO 75 (wPi 6)", description: "PC11", state: false },
-    { pin: "GPIO 69 (wPi 7)", description: "PC5", state: false },
-    { pin: "GPIO 72 (wPi 8)", description: "PC8", state: false },
-    { pin: "GPIO 79 (wPi 9)", description: "PC15", state: false },
-    { pin: "GPIO 78 (wPi 10)", description: "PC14", state: false },
-    { pin: "GPIO 231 (wPi 11)", description: "MOSI.1", state: false },
-    { pin: "GPIO 232 (wPi 12)", description: "MISO.1", state: false },
-    { pin: "GPIO 230 (wPi 14)", description: "SCLK.1", state: false },
-    { pin: "GPIO 233 (wPi 15)", description: "CE.1", state: false },
-    { pin: "GPIO 65 (wPi 17)", description: "PC1", state: false },
-    { pin: "GPIO 272 (wPi 18)", description: "PI16", state: false },
-    { pin: "GPIO 262 (wPi 19)", description: "PI6", state: false },
-    { pin: "GPIO 234 (wPi 20)", description: "PH10", state: false },
-  ])
-
-  const [arduinoGPIOs, setArduinoGPIOs] = useState<GPIOPin[]>([
-    { pin: "D0 (RX)", description: "Comunicación serie (recepción)", state: false },
-    { pin: "D1 (TX)", description: "Comunicación serie (transmisión)", state: false },
-    { pin: "D2", description: "Digital I/O", state: false },
-    { pin: "D3 (PWM)", description: "Digital I/O, PWM", state: false },
-    { pin: "D4", description: "Digital I/O", state: false },
-    { pin: "D5 (PWM)", description: "Digital I/O, PWM", state: false },
-    { pin: "D6 (PWM)", description: "Digital I/O, PWM", state: false },
-    { pin: "D7", description: "Digital I/O", state: false },
-    { pin: "D8", description: "Digital I/O", state: false },
-    { pin: "D9 (PWM)", description: "Digital I/O, PWM", state: false },
-    { pin: "D10 (PWM, SS)", description: "Digital I/O, PWM, SPI SS", state: false },
-    { pin: "D11 (PWM, MOSI)", description: "Digital I/O, PWM, SPI MOSI", state: false },
-    { pin: "D12 (MISO)", description: "Digital I/O, SPI MISO", state: false },
-    { pin: "D13 (SCK)", description: "Digital I/O, SPI SCK", state: false },
-    { pin: "A0", description: "Analog Input", state: false },
-    { pin: "A1", description: "Analog Input", state: false },
-    { pin: "A2", description: "Analog Input", state: false },
-    { pin: "A3", description: "Analog Input", state: false },
-    { pin: "A4 (SDA)", description: "Analog Input, I2C SDA", state: false },
-    { pin: "A5 (SCL)", description: "Analog Input, I2C SCL", state: false },
-  ])
-
-  const [esp8266GPIOs, setEsp8266GPIOs] = useState<GPIOPin[]>([
-    { pin: "GPIO 0", description: "Salida controlada", state: false },
-    { pin: "GPIO 1 (TX)", description: "Transmisión serie", state: false },
-    { pin: "GPIO 2", description: "Entrada/Salida", state: false },
-    { pin: "GPIO 4", description: "Control digital, I2C SDA", state: false },
-    { pin: "GPIO 5", description: "Control digital, I2C SCL", state: false },
-    { pin: "GPIO 12", description: "GPIO multifuncional, SPI MISO", state: false },
-    { pin: "GPIO 13", description: "GPIO multifuncional, SPI MOSI", state: false },
-    { pin: "GPIO 14", description: "GPIO multifuncional, SPI CLK", state: false },
-    { pin: "GPIO 15", description: "GPIO multifuncional, SPI CS", state: false },
-    { pin: "GPIO 16", description: "Despertar del modo suspensión", state: false },
-  ])
 
   useEffect(() => {
     setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
@@ -292,20 +184,8 @@ export default function CompostControlPanel() {
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="orangepi">Orange Pi</TabsTrigger>
-                  <TabsTrigger value="arduino">Arduino</TabsTrigger>
-                  <TabsTrigger value="esp8266">ESP8266</TabsTrigger>
                   <TabsTrigger value="sensordata">Datos del Sensor</TabsTrigger>
                 </TabsList>
-                <TabsContent value="orangepi">
-                  <Device name="Orange Pi Zero 2" gpios={orangePiGPIOs} />
-                </TabsContent>
-                <TabsContent value="arduino">
-                  <Device name="Arduino UNO R3" gpios={arduinoGPIOs} />
-                </TabsContent>
-                <TabsContent value="esp8266">
-                  <Device name="ESP8266" gpios={esp8266GPIOs} />
-                </TabsContent>
                 <TabsContent value="sensordata">
                   <Card>
                     <CardHeader>
