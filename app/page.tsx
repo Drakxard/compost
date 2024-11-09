@@ -107,10 +107,10 @@ export default function CompostControlPanel() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-center">Panel de Control de Compost Autónomo</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Panel de Control</h1>
       <Card>
         <CardHeader className="flex flex-col items-center space-y-4">
-          <CardTitle className="text-2xl font-bold text-center">Aplicación de Compost</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Monitorear Compost</CardTitle>
           {!isLoggedIn && (
             <Button onClick={handleLogin} className="w-full sm:w-auto">
               Ingresar
@@ -126,23 +126,23 @@ export default function CompostControlPanel() {
                     <SelectValue placeholder="Seleccionar informe" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ultimo">Último informe</SelectItem>
-                    <SelectItem value="2">Informe 2</SelectItem>
-                    <SelectItem value="3">Informe 3</SelectItem>
-                    <SelectItem value="custom">Escoger fecha</SelectItem>
+                    <SelectItem value="ultimo">Compost actual</SelectItem>
+                    <SelectItem value="2">Compost N°1</SelectItem>
+                    <SelectItem value="3">Compost N°2</SelectItem>
+                    <SelectItem value="custom">Compost N°2</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button onClick={() => {/* Lógica para descargar informe */}}>
-                  <Download className="mr-2 h-4 w-4" /> Descargar Informe
+                  <Download className="mr-2 h-4 w-4" /> Descargar
                 </Button>
               </div>
 
               <div className="flex justify-center space-x-4">
                 <Button onClick={handlePhotoCapture}>
-                  <Camera className="mr-2 h-4 w-4" /> Tomar Foto
+                  <Camera className="mr-2 h-4 w-4" /> Tomar Foto (Cel)
                 </Button>
                 <Button onClick={() => fileInputRef.current?.click()}>
-                  <Upload className="mr-2 h-4 w-4" /> Subir Foto
+                  <Upload className="mr-2 h-4 w-4" /> Subir Foto (PC)
                 </Button>
                 <Input
                   type="file"
@@ -171,25 +171,25 @@ export default function CompostControlPanel() {
                       objectFit="cover"
                     />
                   </div>
-                  <Button onClick={handleConfirm} className="w-full">Confirmar</Button>
+                  <Button onClick={handleConfirm} className="w-full">Generar descripción</Button>
                 </div>
               )}
 
               {analysisResult && (
                 <div className="mt-4 p-4 bg-black text-white rounded-lg">
-                  <h3 className="font-bold mb-2">Resultado del análisis:</h3>
+                  <h3 className="font-bold mb-2">Resultado del análisis (en ingles):</h3>
                   <p>{analysisResult}</p>
                 </div>
               )}
 
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="sensordata">Datos del Sensor</TabsTrigger>
+                  <TabsTrigger value="sensordata">Compost Actual</TabsTrigger>
                 </TabsList>
                 <TabsContent value="sensordata">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Datos del Sensor</CardTitle>
+                      <CardTitle>Datos de los Sensores</CardTitle>
                       <CardDescription>Lecturas de Temperatura y Humedad</CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6">
